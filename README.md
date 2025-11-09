@@ -1,8 +1,12 @@
 # WCAGAI v4.0 - Web Accessibility Scanner
 
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/aaj441/wcagai-v4-reality-check)
+
 ## 🚀 AI-Powered Web Accessibility Scanner with Vertical Intelligence
 
 WCAGAI v4.0 is a fully implemented, production-ready web accessibility compliance scanner that combines Axe-core WCAG scanning, SerpAPI-powered discovery, vertical-specific intelligence, and comprehensive WCAG 2.2 AA analysis capabilities.
+
+**⚡ One-Click Deploy:** Click the button above to deploy to Railway in under 3 minutes!
 
 ### ✨ Key Features
 

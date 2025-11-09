@@ -1,0 +1,49 @@
+{
+  "name": "WCAGAI v4.0 - Web Accessibility Scanner",
+  "description": "AI-powered web accessibility compliance scanner with vertical intelligence, WCAG 2.2 AA scanning, and real-time analytics",
+  "services": [
+    {
+      "name": "wcagai-app",
+      "serviceName": "app",
+      "image": null,
+      "buildCommand": "npm install --production=false",
+      "startCommand": "npm start",
+      "healthcheckPath": "/health",
+      "healthcheckTimeout": 100,
+      "envVars": {
+        "NODE_ENV": {
+          "description": "Application environment",
+          "default": "production"
+        },
+        "SERPAPI_KEY": {
+          "description": "SerpAPI key for site discovery (optional - app works without it)",
+          "default": ""
+        },
+        "MAX_CONCURRENT_SCANS": {
+          "description": "Maximum concurrent scans",
+          "default": "3"
+        },
+        "SCAN_TIMEOUT_MS": {
+          "description": "Scan timeout in milliseconds",
+          "default": "30000"
+        },
+        "RATE_LIMIT_MAX_REQUESTS": {
+          "description": "Rate limit max requests per window",
+          "default": "100"
+        }
+      }
+    },
+    {
+      "name": "redis",
+      "serviceName": "redis",
+      "image": "redis:alpine",
+      "ports": [6379]
+    }
+  ],
+  "plugins": [
+    {
+      "name": "redis",
+      "type": "redis"
+    }
+  ]
+}
