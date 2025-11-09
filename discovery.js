@@ -11,12 +11,28 @@ class VerticalDiscovery {
         // Initialize SerpAPI client with environment token
         this.client = new SerpApiSearch(process.env.SERPAPI_KEY || process.env.SERPAPI_TOKEN || 'demo');
         
-        // Initialize Redis client for caching
-        this.redis = redis.createClient({
-            host: process.env.REDIS_HOST || 'localhost',
-            port: process.env.REDIS_PORT || 6379,
-            db: process.env.REDIS_DB || 0
-        });
+        // Initialize Redis client for caching (with error handling)
+        this.redisAvailable = false;
+        try {
+            this.redis = redis.createClient({
+                host: process.env.REDIS_HOST || 'localhost',
+                port: process.env.REDIS_PORT || 6379,
+                db: process.env.REDIS_DB || 0
+            });
+            
+            this.redis.on('error', (err) => {
+                console.warn('Redis connection error:', err.message);
+                this.redisAvailable = false;
+            });
+            
+            this.redis.on('ready', () => {
+                this.redisAvailable = true;
+                console.log('Redis connected successfully');
+            });
+        } catch (error) {
+            console.warn('Redis initialization failed:', error.message);
+            this.redis = null;
+        }
         
         // Vertical-specific search templates (validated 2025 data)
         this.verticalTemplates = {
@@ -158,6 +174,9 @@ class VerticalDiscovery {
      * Cache results in Redis
      */
     async cacheResults(key, data, ttl) {
+        if (!this.redis || !this.redisAvailable) {
+            return; // Skip caching if Redis is not available
+        }
         try {
             await this.redis.setex(key, ttl, JSON.stringify(data));
             console.log(`Cached discovery results: ${key}`);
@@ -170,6 +189,9 @@ class VerticalDiscovery {
      * Retrieve cached results
      */
     async getFromCache(key) {
+        if (!this.redis || !this.redisAvailable) {
+            return null; // Skip cache retrieval if Redis is not available
+        }
         try {
             const cached = await this.redis.get(key);
             return cached ? JSON.parse(cached) : null;
@@ -216,8 +238,12 @@ class VerticalDiscovery {
      * Close Redis connection
      */
     async disconnect() {
-        if (this.redis) {
-            await this.redis.quit();
+        if (this.redis && this.redisAvailable) {
+            try {
+                await this.redis.quit();
+            } catch (error) {
+                console.warn('Redis disconnect error:', error.message);
+            }
         }
     }
 }
