@@ -88,7 +88,8 @@ class DiscoveryService {
       healthcare: 'top healthcare websites medical information patient resources',
       fintech: 'top fintech companies financial services banking platforms',
       ecommerce: 'top ecommerce websites online shopping platforms',
-      education: 'top educational institutions universities online learning'
+      education: 'top educational institutions universities online learning',
+      gaming: 'top gaming platforms video game stores esports websites'
     };
     return queries[vertical] || `top ${vertical} websites`;
   }

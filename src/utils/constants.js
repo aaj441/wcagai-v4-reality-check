@@ -47,6 +47,21 @@ const VERTICAL_BENCHMARKS = {
       { url: 'https://www.khanacademy.org', title: 'Khan Academy', monthlyVisits: 45000000 }
     ],
     mandate: 'Section 508 compliance required for federal funding'
+  },
+  gaming: {
+    avgCompliance: 42,
+    averageRevenue: 350000000,
+    sites: [
+      { url: 'https://store.steampowered.com', title: 'Steam', monthlyVisits: 520000000 },
+      { url: 'https://www.epicgames.com', title: 'Epic Games Store', monthlyVisits: 95000000 },
+      { url: 'https://www.ign.com', title: 'IGN', monthlyVisits: 180000000 },
+      { url: 'https://www.twitch.tv', title: 'Twitch', monthlyVisits: 1800000000 },
+      { url: 'https://www.roblox.com', title: 'Roblox', monthlyVisits: 420000000 },
+      { url: 'https://www.nintendo.com', title: 'Nintendo', monthlyVisits: 75000000 },
+      { url: 'https://www.ea.com', title: 'EA Games', monthlyVisits: 65000000 },
+      { url: 'https://www.playstation.com', title: 'PlayStation', monthlyVisits: 125000000 }
+    ],
+    mandate: 'ADA Title III compliance, CVAA for communications features'
   }
 };
 
