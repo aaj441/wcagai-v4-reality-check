@@ -1,0 +1,22 @@
+require('dotenv').config();
+
+module.exports = {
+  port: process.env.PORT || 3000,
+  env: process.env.NODE_ENV || 'development',
+  redis: {
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    ttl: parseInt(process.env.CACHE_TTL_HOURS || '24') * 3600
+  },
+  serpapi: {
+    key: process.env.SERPAPI_KEY,
+    maxResults: 20
+  },
+  scanner: {
+    maxConcurrent: parseInt(process.env.MAX_CONCURRENT_SCANS || '3'),
+    timeout: parseInt(process.env.SCAN_TIMEOUT_MS || '30000')
+  },
+  rateLimit: {
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100')
+  }
+};
