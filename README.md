@@ -50,14 +50,35 @@ npm install
 
 # Set up environment variables
 cp .env.example .env
-# Add your SERPAPI_KEY to .env
+# Edit .env and add your SERPAPI_KEY from https://serpapi.com/
+
+# Optional: Start Redis for caching (if available)
+# redis-server
 
 # Run tests
 npm test
 
-# Start the scanner
+# Start the Express API server
 npm start
+
+# The server will be available at http://localhost:3000
 ```
+
+## 🖥️ Server API Endpoints
+
+The Express server provides the following endpoints:
+
+- **GET /api/health** - Health check endpoint
+- **POST /api/discover** - Discover sites based on keywords and vertical
+  ```json
+  {
+    "keywords": ["healthcare", "patient portal"],
+    "vertical": "healthcare",
+    "limit": 20
+  }
+  ```
+- **GET /api/verticals** - List available verticals
+- **GET /api/vertical/:name/stats** - Get statistics for a specific vertical
 
 ## 🎯 Usage
 
