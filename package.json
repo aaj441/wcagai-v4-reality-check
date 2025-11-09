@@ -1,0 +1,26 @@
+{
+  "name": "wcagai-v4-reality-check",
+  "version": "4.0.0",
+  "description": "WCAGAI v4.0 - AI-powered web accessibility scanner with vertical intelligence",
+  "main": "discovery.js",
+  "scripts": {
+    "test": "node test-discovery.js",
+    "start": "node scanner-v4-integration.js"
+  },
+  "keywords": [
+    "wcag",
+    "accessibility",
+    "a11y",
+    "scanner",
+    "compliance",
+    "serpapi",
+    "vertical-intelligence"
+  ],
+  "author": "WCAGAI Team",
+  "license": "MIT",
+  "dependencies": {
+    "google-search-results-nodejs": "^2.1.0",
+    "redis": "^4.6.0",
+    "axios": "^1.6.0"
+  }
+}
