@@ -1,6 +1,7 @@
 const app = require('./app');
 const config = require('../config');
 const { validateEnvironment } = require('../config/validator');
+const { initializeSentry, captureException } = require('../config/sentry');
 const logger = require('./utils/logger');
 const cacheService = require('./services/cache');
 const scannerService = require('./services/scanner');
@@ -13,11 +14,15 @@ async function initializeServices() {
     // Validate environment configuration
     validateEnvironment();
 
+    // Initialize Sentry error tracking
+    initializeSentry(app);
+
     // Connect to Redis
     await cacheService.connect();
     logger.info('Services initialized successfully');
   } catch (error) {
     logger.error('Service initialization error:', error);
+    captureException(error, { context: 'Service Initialization' });
     // Continue running even if Redis fails (degraded mode)
   }
 }
@@ -68,11 +73,13 @@ async function startServer() {
   // Handle uncaught errors
   process.on('uncaughtException', (error) => {
     logger.error('Uncaught Exception:', error);
+    captureException(error, { context: 'Uncaught Exception' });
     gracefulShutdown('UNCAUGHT_EXCEPTION');
   });
 
   process.on('unhandledRejection', (reason, promise) => {
     logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    captureException(reason, { context: 'Unhandled Rejection', promise });
   });
 
   return server;

@@ -8,17 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- GitHub Actions CI/CD pipeline
-- ESLint and Prettier configuration
-- Docker and Docker Compose support
-- Environment validation on startup
-- CONTRIBUTING.md guidelines
-- CODE_OF_CONDUCT.md
-- SECURITY.md policy
-- GitHub issue and PR templates
+- GitHub Actions CI/CD pipeline with Node 18/20 matrix testing
+- Redis service container in CI/CD
+- Automated linting, testing, security audits, and Docker builds
+- ESLint configuration for code quality enforcement
+- Prettier configuration for consistent code formatting
+- Multi-stage Docker build with Chromium installation
+- Docker Compose setup with Redis service and health checks
+- Environment validation on startup with errors and warnings
+- Sentry error tracking and performance monitoring integration
+- OpenAPI 3.0 specification (openapi.yaml) with complete API documentation
+- Swagger UI at /api/docs for interactive API exploration
+- Scanner service unit tests (tests/unit/scanner.test.js)
+- Analytics service unit tests (tests/unit/analytics.test.js)
+- CONTRIBUTING.md with detailed contribution guidelines
+- CODE_OF_CONDUCT.md based on Contributor Covenant 2.1
+- SECURITY.md with vulnerability reporting process
+- GitHub issue templates (bug report, feature request, question)
+- GitHub pull request template with comprehensive checklist
+- Sentry DSN configuration in environment variables
+- API endpoint for serving interactive documentation
 
 ### Changed
-- Nothing yet
+- Updated src/server.js to initialize Sentry and validate environment
+- Updated src/app.js to integrate Sentry middleware (request, tracing, error handlers)
+- Updated config/index.js to include Sentry configuration
+- Updated .env.example with Sentry configuration options
+- Updated root endpoint (/) to include /api/docs link
+
+### Removed
+- axios dependency (unused)
 
 ### Fixed
 - Nothing yet

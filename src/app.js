@@ -6,11 +6,13 @@ const config = require('../config');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimiter = require('./middleware/rateLimiter');
+const { getRequestHandler, getTracingHandler, getErrorHandler } = require('../config/sentry');
 
 // Routes
 const healthRoutes = require('./routes/health');
 const discoveryRoutes = require('./routes/discovery');
 const scanRoutes = require('./routes/scan');
+const docsRoutes = require('./routes/docs');
 
 const app = express();
 
@@ -28,6 +30,10 @@ app.use(compression());
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Sentry request tracking (must be before routes)
+app.use(getRequestHandler());
+app.use(getTracingHandler());
 
 // Rate limiting
 app.use('/api/', rateLimiter);
@@ -48,6 +54,7 @@ app.use(express.static('public'));
 app.use('/health', healthRoutes);
 app.use('/api/discovery', discoveryRoutes);
 app.use('/api/scan', scanRoutes);
+app.use('/api/docs', docsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -61,7 +68,8 @@ app.get('/', (req, res) => {
       verticals: '/api/discovery/verticals',
       scan: 'POST /api/scan {url: "https://example.com"}',
       verticalScan: 'POST /api/scan/vertical {vertical: "healthcare", maxSites: 5}',
-      scanStatus: '/api/scan/status'
+      scanStatus: '/api/scan/status',
+      apiDocs: '/api/docs'
     },
     docs: 'https://github.com/aaj441/wcagai-v4-reality-check'
   });
@@ -78,6 +86,9 @@ app.use((req, res) => {
     }
   });
 });
+
+// Sentry error handler (must be before global error handler)
+app.use(getErrorHandler());
 
 // Global error handler
 app.use(errorHandler);

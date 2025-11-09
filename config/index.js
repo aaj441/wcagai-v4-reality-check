@@ -18,5 +18,12 @@ module.exports = {
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100')
+  },
+  sentry: {
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'development',
+    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '0.1'),
+    profilesSampleRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE || '0.1'),
+    enabled: process.env.NODE_ENV === 'production' && !!process.env.SENTRY_DSN
   }
 };

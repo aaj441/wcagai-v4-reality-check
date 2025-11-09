@@ -1,0 +1,537 @@
+openapi: 3.0.3
+info:
+  title: WCAGAI v4.0 - Web Accessibility Scanner API
+  description: |
+    AI-powered web accessibility scanner with vertical intelligence.
+
+    This API provides comprehensive WCAG 2.0/2.1/2.2 compliance scanning,
+    industry benchmarking, and vertical-specific analytics for healthcare,
+    fintech, e-commerce, and education sectors.
+
+    ## Features
+    - WCAG 2.0/2.1/2.2 compliance scanning with Axe-core
+    - SerpAPI integration for site discovery
+    - Industry-specific benchmarks and analytics
+    - Revenue impact estimation
+    - Redis caching with 24-hour TTL
+
+    ## Rate Limiting
+    All `/api/*` endpoints are rate-limited to 100 requests per 15 minutes.
+
+    ## Authentication
+    Currently no authentication required. This will be added in future versions.
+
+  version: 4.0.0
+  contact:
+    name: WCAGAI Team
+    url: https://github.com/aaj441/wcagai-v4-reality-check
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: https://your-app.railway.app
+    description: Railway production server
+
+tags:
+  - name: Health
+    description: Health check and system status
+  - name: Discovery
+    description: Site discovery and vertical information
+  - name: Scanning
+    description: WCAG compliance scanning endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API and its dependencies
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: 'healthy'
+                timestamp: '2025-11-09T12:00:00.000Z'
+                uptime: 3600
+                services:
+                  redis: 'connected'
+                  scanner: 'ready'
+                  serpapi: 'configured'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/discovery:
+    get:
+      summary: Discover sites for a vertical
+      description: |
+        Discover websites for a specific industry vertical using SerpAPI.
+        Results are cached for 24 hours. Falls back to predefined data if
+        SerpAPI is not configured.
+      tags:
+        - Discovery
+      parameters:
+        - name: vertical
+          in: query
+          required: true
+          description: Industry vertical (healthcare, fintech, ecommerce, education)
+          schema:
+            type: string
+            enum: [healthcare, fintech, ecommerce, education]
+        - name: maxResults
+          in: query
+          required: false
+          description: Maximum number of results to return (1-100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Sites discovered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiscoveryResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Discovery failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/discovery/verticals:
+    get:
+      summary: Get available verticals
+      description: Returns list of all supported industry verticals with metadata
+      tags:
+        - Discovery
+      responses:
+        '200':
+          description: Verticals retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerticalsResponse'
+
+  /api/scan:
+    post:
+      summary: Scan a single URL
+      description: |
+        Scan a single URL for WCAG compliance issues.
+        Returns detailed violation information, compliance score, and recommendations.
+      tags:
+        - Scanning
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequest'
+            example:
+              url: 'https://example.com'
+      responses:
+        '200':
+          description: Scan completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResponse'
+        '400':
+          description: Invalid URL or request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Scan failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scan/vertical:
+    post:
+      summary: Scan multiple sites for a vertical
+      description: |
+        Discover and scan multiple sites for a specific vertical.
+        Returns aggregated analytics and industry comparison.
+      tags:
+        - Scanning
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerticalScanRequest'
+            example:
+              vertical: 'healthcare'
+              maxSites: 5
+      responses:
+        '200':
+          description: Vertical scan completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerticalScanResponse'
+        '400':
+          description: Invalid vertical or parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Scan failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/scan/status:
+    get:
+      summary: Get scanner status
+      description: Returns current status of the scanner service
+      tags:
+        - Scanning
+      responses:
+        '200':
+          description: Scanner status retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScannerStatusResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+          description: Uptime in seconds
+        services:
+          type: object
+          properties:
+            redis:
+              type: string
+              enum: [connected, disconnected, error]
+            scanner:
+              type: string
+              enum: [ready, initializing, error]
+            serpapi:
+              type: string
+              enum: [configured, not-configured]
+
+    DiscoveryResponse:
+      type: object
+      properties:
+        vertical:
+          type: string
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscoveredSite'
+        count:
+          type: integer
+        source:
+          type: string
+          enum: [serpapi, fallback, cache]
+
+    DiscoveredSite:
+      type: object
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        snippet:
+          type: string
+
+    VerticalsResponse:
+      type: object
+      properties:
+        verticals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vertical'
+
+    Vertical:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        mandate:
+          type: string
+        avgCompliance:
+          type: number
+        topViolations:
+          type: array
+          items:
+            type: string
+
+    ScanRequest:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL to scan (must be valid HTTP/HTTPS URL)
+
+    ScanResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        timestamp:
+          type: string
+          format: date-time
+        complianceScore:
+          type: number
+          minimum: 0
+          maximum: 100
+        violationCount:
+          type: integer
+        passCount:
+          type: integer
+        violations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        passes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pass'
+        summary:
+          $ref: '#/components/schemas/ScanSummary'
+        violationsByImpact:
+          $ref: '#/components/schemas/ViolationsByImpact'
+        violationsByLevel:
+          $ref: '#/components/schemas/ViolationsByLevel'
+
+    Violation:
+      type: object
+      properties:
+        id:
+          type: string
+        impact:
+          type: string
+          enum: [critical, serious, moderate, minor]
+        description:
+          type: string
+        help:
+          type: string
+        helpUrl:
+          type: string
+          format: uri
+        tags:
+          type: array
+          items:
+            type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViolationNode'
+
+    ViolationNode:
+      type: object
+      properties:
+        html:
+          type: string
+        target:
+          type: array
+          items:
+            type: string
+        failureSummary:
+          type: string
+
+    Pass:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        help:
+          type: string
+
+    ScanSummary:
+      type: object
+      properties:
+        violations:
+          type: integer
+        passes:
+          type: integer
+        critical:
+          type: integer
+        serious:
+          type: integer
+        moderate:
+          type: integer
+        minor:
+          type: integer
+
+    ViolationsByImpact:
+      type: object
+      properties:
+        critical:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        serious:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        moderate:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        minor:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+
+    ViolationsByLevel:
+      type: object
+      properties:
+        A:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        AA:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+        AAA:
+          type: array
+          items:
+            $ref: '#/components/schemas/Violation'
+
+    VerticalScanRequest:
+      type: object
+      required:
+        - vertical
+      properties:
+        vertical:
+          type: string
+          enum: [healthcare, fintech, ecommerce, education]
+        maxSites:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+
+    VerticalScanResponse:
+      type: object
+      properties:
+        vertical:
+          type: string
+        sitesScanned:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScanResponse'
+        analytics:
+          $ref: '#/components/schemas/VerticalAnalytics'
+
+    VerticalAnalytics:
+      type: object
+      properties:
+        avgCompliance:
+          type: number
+        benchmarkCompliance:
+          type: number
+        complianceGap:
+          type: number
+        totalViolations:
+          type: integer
+        violationSummary:
+          $ref: '#/components/schemas/ScanSummary'
+        topViolations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopViolation'
+        revenueImpact:
+          $ref: '#/components/schemas/RevenueImpact'
+
+    TopViolation:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        impact:
+          type: string
+        count:
+          type: integer
+
+    RevenueImpact:
+      type: object
+      properties:
+        complianceGap:
+          type: string
+        estimatedRevenueLoss:
+          type: number
+        currency:
+          type: string
+        note:
+          type: string
+
+    ScannerStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ready, busy, error]
+        browserReady:
+          type: boolean
+        activeScans:
+          type: integer
+        maxConcurrent:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
