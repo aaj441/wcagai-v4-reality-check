@@ -55,28 +55,49 @@ cp .env.example .env
 # Run tests
 npm test
 
-# Start the scanner
+# Start the API server
 npm start
+
+# Or run the scanner directly
+npm run scan -- --keywords="fintech,banking" --vertical="fintech"
 ```
 
 ## 🎯 Usage
 
-### Basic Scan
+### API Server
+Start the Express API server:
+```bash
+npm start
+```
+
+The API will be available at `http://localhost:3000` with the following endpoints:
+
+- `GET /health` - Health check
+- `GET /api/verticals` - Get available verticals
+- `POST /api/discover` - Discover sites by keywords
+- `POST /api/scan` - Scan sites with discovery
+- `GET /api/benchmarks/:vertical` - Get vertical benchmarks
+
+### Discovery System
 ```javascript
 const VerticalDiscovery = require('./discovery');
 
 const discovery = new VerticalDiscovery();
-const sites = await discovery.discover('healthcare', 20);
+const sites = await discovery.discover(['healthcare'], 'healthcare', 20);
 console.log(sites);
 ```
 
-### With Scanner Integration
+### Scanner Integration
 ```javascript
-const { scanVertical } = require('./scanner-v4-integration');
+const WCAGAIV4Scanner = require('./scanner-v4-integration');
 
-const results = await scanVertical('fintech', 5);
-console.log(`Average Compliance: ${results.avgCompliance}%`);
-console.log(`Total Violations: ${results.totalViolations}`);
+const scanner = new WCAGAIV4Scanner();
+const results = await scanner.scan({ 
+  keywords: ['fintech', 'banking'], 
+  vertical: 'fintech' 
+});
+console.log(`Average Compliance: ${results.analysis.averageCompliance}%`);
+console.log(`Total Violations: ${results.analysis.totalViolations}`);
 ```
 
 ## 📈 Project Status
@@ -122,11 +143,48 @@ MIT License - see LICENSE file for details
 - **W3C**: WCAG 2.2 AA standards
 - **SerpAPI**: Keyword discovery infrastructure
 
+## 🚀 Deployment
+
+### Railway Deployment
+
+This project includes Railway configuration for easy deployment:
+
+1. Push your code to GitHub
+2. Import the repository in Railway
+3. Add environment variables in Railway dashboard:
+   - `SERPAPI_KEY` - Your SerpAPI key
+   - `PORT` - Will be set automatically by Railway
+4. Railway will automatically deploy using `railway.toml` configuration
+
+### Environment Variables
+
+Required for production:
+- `SERPAPI_KEY` - SerpAPI key for live discovery (get one at [serpapi.com](https://serpapi.com))
+
+Optional:
+- `REDIS_HOST` - Redis host (default: localhost)
+- `REDIS_PORT` - Redis port (default: 6379)
+- `PORT` - Server port (default: 3000)
+
+### Docker Deployment (Optional)
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
 ## 🔗 Links
 
 - [WCAG 2.2 Guidelines](https://www.w3.org/WAI/WCAG22/quickref/)
 - [European Accessibility Act](https://ec.europa.eu/social/main.jsp?catId=1202)
 - [HHS WCAG Mandate](https://www.hhs.gov/)
+- [Railway Deployment](https://railway.app/)
+- [SerpAPI](https://serpapi.com/)
 
 ## 📧 Contact
 
@@ -134,4 +192,4 @@ For questions or collaboration opportunities, please open an issue on GitHub.
 
 ---
 
-**Status**: Week 1 Complete | Data-Validated | Production-Ready Discovery System
+**Status**: Week 1 Complete | Data-Validated | Production-Ready | Deployment-Ready
