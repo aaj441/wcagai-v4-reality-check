@@ -1,5 +1,6 @@
 const app = require('./app');
 const config = require('../config');
+const { validateEnvironment } = require('../config/validator');
 const logger = require('./utils/logger');
 const cacheService = require('./services/cache');
 const scannerService = require('./services/scanner');
@@ -9,6 +10,9 @@ const PORT = config.port;
 // Initialize services
 async function initializeServices() {
   try {
+    // Validate environment configuration
+    validateEnvironment();
+
     // Connect to Redis
     await cacheService.connect();
     logger.info('Services initialized successfully');

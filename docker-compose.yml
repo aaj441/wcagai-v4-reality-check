@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - SERPAPI_KEY=${SERPAPI_KEY:-}
+      - MAX_CONCURRENT_SCANS=3
+      - SCAN_TIMEOUT_MS=30000
+      - CACHE_TTL_HOURS=24
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - wcagai-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - wcagai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  wcagai-network:
+    driver: bridge
