@@ -46,6 +46,12 @@ class VerticalDiscovery {
      * @returns {Promise<Array>} Array of discovered sites with traffic data
      */
     async discover(keywords, vertical, limit = 20) {
+        // Validate vertical is one of the allowed values
+        const allowedVerticals = ['healthcare', 'fintech', 'ecommerce'];
+        if (!allowedVerticals.includes(vertical)) {
+            throw new Error(`Invalid vertical: ${vertical}. Must be one of: ${allowedVerticals.join(', ')}`);
+        }
+
         try {
             // Check cache first for performance
             const cacheKey = `discovery:${vertical}:${keywords.join(',')}`;
@@ -76,7 +82,9 @@ class VerticalDiscovery {
             return sites;
 
         } catch (error) {
-            console.error(`Discovery error for ${vertical}:`, error);
+            // Sanitize vertical name for logging to prevent injection
+            const safeVertical = String(vertical).replace(/[^a-zA-Z0-9_-]/g, '');
+            console.error(`Discovery error for ${safeVertical}:`, error.message);
             // Fallback to known top sites for the vertical
             return this.getFallbackSites(vertical);
         }
