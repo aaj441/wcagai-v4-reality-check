@@ -92,7 +92,7 @@ class VerticalDiscovery {
             return sites;
 
         } catch (error) {
-            console.error(`Discovery error for ${vertical}:`, error);
+            console.error('Discovery error for vertical:', vertical, error.message);
             // Fallback to known top sites for the vertical
             return this.getFallbackSites(vertical);
         }
