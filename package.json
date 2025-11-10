@@ -1,47 +1,37 @@
 {
-  "name": "wcagai-v4-reality-check",
-  "version": "4.0.0",
-  "description": "WCAGAI v4.0 - AI-powered web accessibility scanner with vertical intelligence",
-  "main": "src/server.js",
+  "name": "wcag-ai-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WCAG AI Compliance Consultant Platform - Monorepo MVP",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
-    "lint": "eslint src/**/*.js",
-    "format": "prettier --write \"src/**/*.js\""
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
   "keywords": [
     "wcag",
     "accessibility",
     "a11y",
-    "scanner",
     "compliance",
-    "serpapi",
-    "vertical-intelligence"
+    "ai",
+    "monorepo"
   ],
   "author": "WCAGAI Team",
   "license": "MIT",
-  "dependencies": {
-    "express": "^4.18.2",
-    "dotenv": "^16.3.1",
-    "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5",
-    "joi": "^17.11.0",
-    "axios": "^1.6.2",
-    "redis": "^4.6.11",
-    "serpapi": "^2.0.1",
-    "axe-core": "^4.8.3",
-    "puppeteer": "^21.6.1",
-    "winston": "^3.11.0",
-    "compression": "^1.7.4",
-    "cors": "^2.8.5"
+  "packageManager": "pnpm@8.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "supertest": "^6.3.3",
-    "nodemon": "^3.0.2",
-    "eslint": "^8.55.0",
-    "prettier": "^3.1.1"
+    "@types/node": "^20.11.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "turbo": "^1.12.0",
+    "typescript": "^5.3.3"
   }
 }

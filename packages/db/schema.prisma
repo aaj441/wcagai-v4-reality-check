@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Scan {
+  id          String   @id @default(cuid())
+  url         String
+  status      String   @default("pending") // pending, running, completed, failed
+  score       Int?
+  violations  Json?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  completedAt DateTime?
+
+  @@index([url])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Violation {
+  id              String   @id @default(cuid())
+  scanId          String
+  ruleId          String
+  impact          String
+  description     String
+  helpUrl         String?
+  nodes           Json
+  confidenceScore Int
+  confidenceLevel String
+  createdAt       DateTime @default(now())
+
+  @@index([scanId])
+  @@index([ruleId])
+  @@index([impact])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("user") // user, admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
