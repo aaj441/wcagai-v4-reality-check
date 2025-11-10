@@ -1,0 +1,57 @@
+{
+  "summary": {
+    "totalProspects": 0,
+    "successfulScans": 0,
+    "totalViolations": 0,
+    "avgCompliance": null,
+    "highRiskProspects": 0,
+    "estimatedTAM": "$0/year"
+  },
+  "results": [
+    {
+      "prospect": {
+        "name": "HealthTech Solutions",
+        "website": "https://www.webmd.com",
+        "email": "cto@example-health.com",
+        "vertical": "healthcare"
+      },
+      "error": "Could not find Chrome (ver. 121.0.6167.85). This can occur if either\n 1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or\n 2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).\nFor (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration."
+    },
+    {
+      "prospect": {
+        "name": "FinancePro Digital",
+        "website": "https://www.chase.com",
+        "email": "engineering@example-fintech.com",
+        "vertical": "fintech"
+      },
+      "error": "Could not find Chrome (ver. 121.0.6167.85). This can occur if either\n 1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or\n 2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).\nFor (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration."
+    },
+    {
+      "prospect": {
+        "name": "EduLearn Platform",
+        "website": "https://www.coursera.org",
+        "email": "product@example-edu.com",
+        "vertical": "education"
+      },
+      "error": "Could not find Chrome (ver. 121.0.6167.85). This can occur if either\n 1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or\n 2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).\nFor (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration."
+    },
+    {
+      "prospect": {
+        "name": "GameHub Network",
+        "website": "https://www.ign.com",
+        "email": "dev@example-gaming.com",
+        "vertical": "gaming"
+      },
+      "error": "Could not find Chrome (ver. 121.0.6167.85). This can occur if either\n 1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or\n 2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).\nFor (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration."
+    },
+    {
+      "prospect": {
+        "name": "ShopEasy Commerce",
+        "website": "https://www.etsy.com",
+        "email": "tech@example-ecommerce.com",
+        "vertical": "ecommerce"
+      },
+      "error": "Could not find Chrome (ver. 121.0.6167.85). This can occur if either\n 1. you did not perform an installation before running the script (e.g. `npx puppeteer browsers install chrome`) or\n 2. your cache path is incorrectly configured (which is: /root/.cache/puppeteer).\nFor (2), check out our guide on configuring puppeteer at https://pptr.dev/guides/configuration."
+    }
+  ]
+}
