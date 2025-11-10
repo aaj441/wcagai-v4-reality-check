@@ -46,6 +46,7 @@ web_modules/
 
 # TypeScript cache
 *.tsbuildinfo
+next-env.d.ts
 
 # Optional npm cache directory
 .npm
@@ -77,6 +78,7 @@ web_modules/
 # Next.js build output
 .next
 out
+build
 
 # Nuxt.js build / generate output
 .nuxt
@@ -137,3 +139,32 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Generated documents
+generated-documents/
+*.pdf
+*.docx
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Prisma
+/prisma/migrations/dev.db
+/prisma/*.db
+/prisma/*.db-journal
+
+# Light Core logs
+/logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
