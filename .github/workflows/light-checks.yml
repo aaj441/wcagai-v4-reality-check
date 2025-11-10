@@ -1,0 +1,171 @@
+name: Light Core Charter Enforcement
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  light-checks:
+    name: Enforce Light Charter Principles
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      actions: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd packages/light-core
+        npm ci
+      env:
+        PUPPETEER_SKIP_DOWNLOAD: true
+
+    - name: Build Light Core
+      run: |
+        cd packages/light-core
+        npm run build
+
+    - name: Run Light Core tests
+      run: |
+        cd packages/light-core
+        npm test
+      continue-on-error: false
+
+    - name: Validate Charter Principles
+      run: |
+        node -e "
+        const { LIGHT_CHARTER, validateCriticalPrinciples } = require('./packages/light-core/light-config');
+        console.log('Validating Light Charter...');
+        try {
+          validateCriticalPrinciples();
+          console.log('✅ All critical principles are enabled');
+          console.log('Charter version:', LIGHT_CHARTER.version);
+          console.log('Principles:', Object.keys(LIGHT_CHARTER.principles).length);
+        } catch (error) {
+          console.error('❌ Charter validation failed:', error.message);
+          process.exit(1);
+        }
+        "
+
+    - name: Check for trauma language in codebase
+      run: |
+        echo "Scanning codebase for trauma language patterns..."
+        
+        # Search for potentially harmful patterns in source code
+        ISSUES=0
+        
+        # Check for shame/blame patterns
+        if grep -r -i "you should have\|you must have\|stupid\|idiot\|dumb\|lazy" src/ --include="*.js" --include="*.ts" | grep -v "test" | grep -v "spec"; then
+          echo "❌ Found potential trauma language in source code"
+          ISSUES=$((ISSUES + 1))
+        fi
+        
+        if [ $ISSUES -gt 0 ]; then
+          echo "❌ Trauma language check failed with $ISSUES issues"
+          exit 1
+        else
+          echo "✅ No trauma language detected"
+        fi
+
+    - name: Verify WCAG references in A11y rules
+      run: |
+        node -e "
+        const { BASE_ISSUES } = require('./packages/light-core/a11y-rules');
+        console.log('Verifying WCAG references in accessibility rules...');
+        
+        let issuesWithoutWcag = 0;
+        for (const issue of BASE_ISSUES) {
+          if (!issue.wcagRef || issue.wcagRef.length === 0) {
+            console.error('❌ Issue missing WCAG reference:', issue.id);
+            issuesWithoutWcag++;
+          }
+        }
+        
+        if (issuesWithoutWcag > 0) {
+          console.error(\`❌ \${issuesWithoutWcag} issues lack WCAG references\`);
+          process.exit(1);
+        }
+        
+        console.log(\`✅ All \${BASE_ISSUES.length} issues have WCAG references\`);
+        "
+
+    - name: Check explainability of outputs
+      run: |
+        echo "Verifying that all model outputs must be explainable..."
+        
+        # Check that lightModelCall is used for AI interactions
+        if grep -r "await.*aiModel\|await.*openai\|await.*anthropic" src/ --include="*.js" --include="*.ts" | grep -v "lightModelCall" | grep -v "test" | grep -v "spec" | grep -v "comment"; then
+          echo "⚠️  Warning: Found potential direct AI calls not using lightModelCall"
+          echo "All AI calls should use lightModelCall for explainability"
+        fi
+        
+        echo "✅ Explainability check completed"
+
+    - name: Verify auditability - check logging
+      run: |
+        node -e "
+        const { lightLogger } = require('./packages/light-core/light-logger');
+        console.log('Verifying auditability through logging...');
+        
+        // Check that logger is configured
+        if (!lightLogger) {
+          console.error('❌ Light logger not configured');
+          process.exit(1);
+        }
+        
+        console.log('✅ Light logger configured for audit trail');
+        console.log('Log level:', process.env.LIGHT_LOG_LEVEL || 'info');
+        "
+
+    - name: Run main project tests
+      run: npm test
+      env:
+        PUPPETEER_SKIP_DOWNLOAD: true
+        NODE_ENV: test
+
+    - name: Generate Light Charter compliance report
+      if: always()
+      run: |
+        echo "# Light Charter Compliance Report" > light-report.md
+        echo "" >> light-report.md
+        echo "## Principles Status" >> light-report.md
+        echo "" >> light-report.md
+        
+        node -e "
+        const { LIGHT_CHARTER } = require('./packages/light-core/light-config');
+        for (const [key, principle] of Object.entries(LIGHT_CHARTER.principles)) {
+          const status = principle.enabled ? '✅' : '❌';
+          console.log(\`- \${status} **\${key}**: \${principle.description} (\${principle.severity})\`);
+        }
+        " >> light-report.md
+        
+        cat light-report.md
+
+    - name: Upload compliance report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: light-charter-compliance-report
+        path: light-report.md
+
+    - name: Final compliance check
+      run: |
+        echo "======================================"
+        echo "Light Charter Enforcement Complete"
+        echo "======================================"
+        echo "Ethics is architecture, not vibes."
+        echo "The square and compass have checked the work."
+        echo "======================================"

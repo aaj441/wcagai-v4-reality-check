@@ -1,0 +1,55 @@
+{
+  "name": "@wcagai/light-core",
+  "version": "1.0.0",
+  "description": "Light Core - Ethical architecture embedded into WCAGAI as mandatory middleware and guardrails",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint *.ts light-tests/*.ts"
+  },
+  "keywords": [
+    "ethics",
+    "accessibility",
+    "wcag",
+    "trauma-informed",
+    "ai-safety",
+    "guardrails"
+  ],
+  "author": "WCAGAI Team",
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^3.11.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  },
+  "peerDependencies": {
+    "express": "^4.18.0"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./light-config": "./light-config.js",
+    "./light-guard": "./light-guard.js",
+    "./light-logger": "./light-logger.js",
+    "./light-middleware": "./light-middleware.js",
+    "./light-prompts": "./light-prompts.js",
+    "./a11y-rules": "./a11y-rules.js",
+    "./light-tests": "./light-tests/index.js",
+    "./light-charter.json": "./light-charter.json"
+  },
+  "files": [
+    "*.js",
+    "*.d.ts",
+    "*.json",
+    "light-tests/**/*.js",
+    "light-tests/**/*.d.ts",
+    "README.md"
+  ]
+}

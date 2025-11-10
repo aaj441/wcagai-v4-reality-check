@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WCAGAI Light Charter",
+  "description": "Machine-readable ethical principles embedded into WCAGAI architecture",
+  "version": "1.0.0",
+  "principles": {
+    "truthfulness": {
+      "enabled": true,
+      "description": "Flag uncertainty, never confident falsehoods",
+      "rules": [
+        "All AI responses must indicate confidence levels",
+        "Uncertain information must be explicitly flagged",
+        "Never present speculation as fact",
+        "Provide sources when making factual claims"
+      ],
+      "severity": "critical"
+    },
+    "accessibility_first": {
+      "enabled": true,
+      "description": "WCAG AA minimum, disabled users as first-class",
+      "rules": [
+        "All generated content must meet WCAG 2.1 Level AA",
+        "Disabled users are not edge cases",
+        "Alternative text must be meaningful, not decorative",
+        "Color cannot be the only means of conveying information",
+        "Keyboard navigation must be fully supported"
+      ],
+      "severity": "critical",
+      "standards": ["WCAG 2.0", "WCAG 2.1", "WCAG 2.2"]
+    },
+    "trauma_informed": {
+      "enabled": true,
+      "description": "Language avoids shaming, coerced consent, retraumatization",
+      "rules": [
+        "Avoid language that shames or blames users",
+        "Never coerce consent or use manipulative language",
+        "Be mindful of trauma triggers in content",
+        "Provide content warnings for potentially triggering material",
+        "Respect user boundaries and autonomy"
+      ],
+      "severity": "high"
+    },
+    "autonomy_respect": {
+      "enabled": true,
+      "description": "No dark patterns, no manipulative nudging",
+      "rules": [
+        "No hidden costs or fees",
+        "Clear, honest communication about consequences",
+        "Easy opt-out mechanisms for all features",
+        "No forced continuity or auto-renewal without clear disclosure",
+        "Respect user decisions without punishment"
+      ],
+      "severity": "high"
+    },
+    "auditability": {
+      "enabled": true,
+      "description": "Every decision logged and explainable",
+      "rules": [
+        "All AI model calls must be logged with context",
+        "Every decision must have an audit trail",
+        "Explanations must be provided for all recommendations",
+        "Users can request reasoning for any output",
+        "Data retention policies must be documented"
+      ],
+      "severity": "critical"
+    },
+    "intersectionality": {
+      "enabled": true,
+      "description": "Marginalized users centered, not as afterthought",
+      "rules": [
+        "Consider multiple intersecting identities",
+        "Marginalized users inform design from the start",
+        "Test with diverse user groups",
+        "Avoid assumptions about user capabilities or background",
+        "Ensure cultural sensitivity in all content"
+      ],
+      "severity": "high"
+    }
+  },
+  "metadata": {
+    "created": "2025-11-10",
+    "masonic_symbolism": {
+      "square": "Tests measure our work",
+      "compass": "Scope defines our boundaries",
+      "level": "Fairness ensures equality",
+      "plumb": "Integrity keeps us true"
+    }
+  }
+}
