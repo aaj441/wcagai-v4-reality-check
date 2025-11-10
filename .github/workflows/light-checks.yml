@@ -1,0 +1,24 @@
+# .github/workflows/light-checks.yml
+name: Light Checks
+on: [push, pull_request]
+jobs:
+  light-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+          if [ -d "packages/light-core" ]; then
+            echo "light-core package found."
+          else
+            echo "light-core package not found."
+            exit 1
+          fi
+      - run: echo "CI check placeholder. Add real tests, linting, and snapshot commands here."
