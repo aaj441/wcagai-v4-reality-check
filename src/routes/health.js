@@ -40,8 +40,9 @@ router.get('/', async (req, res) => {
     heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`
   };
 
-  // Always return 200 - app works in degraded mode without Redis
-  res.status(200).json(health);
+  // Return 503 for degraded status so load balancers can route traffic appropriately
+  const statusCode = health.status === 'degraded' ? 503 : 200;
+  res.status(statusCode).json(health);
 });
 
 module.exports = router;

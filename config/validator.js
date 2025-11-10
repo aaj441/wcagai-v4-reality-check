@@ -1,5 +1,6 @@
 const config = require('./index');
 const logger = require('../src/utils/logger');
+const packageJson = require('../package.json');
 
 /**
  * Validates required environment variables on startup
@@ -10,11 +11,14 @@ function validateEnvironment() {
   const errors = [];
   const warnings = [];
 
-  // Check Node version
+  // Check Node version from package.json engines field
   const nodeVersion = process.version;
   const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-  if (majorVersion < 18) {
-    errors.push(`Node.js version ${nodeVersion} is not supported. Please use Node.js 18+`);
+  const requiredNodeVersion = packageJson.engines?.node || '>=18.0.0';
+  const requiredMajorVersion = parseInt(requiredNodeVersion.replace(/[^\d]/g, ''));
+  
+  if (majorVersion < requiredMajorVersion) {
+    errors.push(`Node.js version ${nodeVersion} is not supported. Please use Node.js ${requiredNodeVersion}`);
   }
 
   // Validate PORT

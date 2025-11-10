@@ -222,28 +222,6 @@ describe('Scanner Service', () => {
 
   describe('_processResults()', () => {
     it('should process Axe results correctly', async () => {
-      const axeResults = {
-        violations: [
-          {
-            id: 'test-violation',
-            impact: 'critical',
-            description: 'Test violation',
-            nodes: [{ html: '<div>' }],
-            tags: ['wcag2a']
-          }
-        ],
-        passes: [
-          {
-            id: 'test-pass',
-            description: 'Test pass',
-            nodes: [{ html: '<span>' }],
-            tags: ['wcag2aa']
-          }
-        ],
-        incomplete: [],
-        inapplicable: []
-      };
-
       const results = await scannerService.scan('https://example.com');
 
       expect(results.violations[0].id).toBe('color-contrast');

@@ -37,8 +37,10 @@ app.use(helmet({
 // CORS - Configured for production
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin only in development (for testing tools like Postman)
+    if (!origin && config.env !== 'production') {
+      return callback(null, true);
+    }
 
     // In production, check against allowed origins
     if (config.env === 'production') {
