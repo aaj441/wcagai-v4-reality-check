@@ -1,0 +1,38 @@
+{
+  "name": "@wcag-ai/scanner",
+  "version": "1.0.0",
+  "description": "Puppeteer-based WCAG scanner service",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "keywords": [
+    "scanner",
+    "wcag",
+    "puppeteer"
+  ],
+  "author": "WCAGAI Team",
+  "license": "MIT",
+  "dependencies": {
+    "@wcag-ai/core": "workspace:*",
+    "@wcag-ai/db": "workspace:*",
+    "@wcag-ai/utils": "workspace:*",
+    "puppeteer": "^22.0.0",
+    "axe-core": "^4.8.3",
+    "bullmq": "^5.1.0",
+    "redis": "^4.6.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
