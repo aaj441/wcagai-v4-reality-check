@@ -1,0 +1,251 @@
+// Prisma Schema for WCAGAI v5 Enterprise Platform
+// PostgreSQL 16 with comprehensive data models
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  AUDITOR
+  VIEWER
+}
+
+enum AuditStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ViolationSeverity {
+  CRITICAL
+  SERIOUS
+  MODERATE
+  MINOR
+}
+
+enum WCAGLevel {
+  A
+  AA
+  AAA
+}
+
+enum TemplateFormat {
+  PDF
+  DOCX
+  HTML
+}
+
+enum GenerationStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  password      String
+  role          UserRole @default(VIEWER)
+  mfaSecret     String?
+  mfaEnabled    Boolean  @default(false)
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  audits              Audit[]
+  templateGenerations TemplateGeneration[]
+  auditLogs           AuditLog[]
+  sessions            Session[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionToken String   @unique
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Audit {
+  id               String      @id @default(cuid())
+  url              String
+  htmlContent      String?     @db.Text
+  status           AuditStatus @default(PENDING)
+  complianceScore  Float?
+  violationCount   Int         @default(0)
+  wcagLevel        WCAGLevel   @default(AA)
+  testSection508   Boolean     @default(false)
+  testEN301549     Boolean     @default(false)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  error            String?     @db.Text
+  metadata         Json?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  userId           String
+
+  // Relations
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  violations AuditViolation[]
+  report     Report?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("audits")
+}
+
+model AuditViolation {
+  id          String             @id @default(cuid())
+  auditId     String
+  wcagCriterion String
+  severity    ViolationSeverity
+  impact      String
+  description String             @db.Text
+  helpUrl     String?
+  elementHtml String?            @db.Text
+  selector    String?
+  xpath       String?
+  evidence    Json?
+  fixSuggestion String?         @db.Text
+  createdAt   DateTime           @default(now())
+
+  // Relations
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([severity])
+  @@index([wcagCriterion])
+  @@map("audit_violations")
+}
+
+model Template {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  content     String   @db.Text
+  variables   Json
+  category    String
+  isFDCPA     Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  generations TemplateGeneration[]
+
+  @@index([category])
+  @@index([isActive])
+  @@map("templates")
+}
+
+model TemplateGeneration {
+  id              String           @id @default(cuid())
+  templateId      String
+  userId          String
+  status          GenerationStatus @default(QUEUED)
+  format          TemplateFormat
+  documentCount   Int              @default(1)
+  variablesData   Json
+  outputPath      String?
+  downloadUrl     String?
+  error           String?          @db.Text
+  startedAt       DateTime?
+  completedAt     DateTime?
+  expiresAt       DateTime?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([templateId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("template_generations")
+}
+
+model Report {
+  id                   String   @id @default(cuid())
+  auditId              String   @unique
+  executiveSummary     String   @db.Text
+  technicalDetails     String   @db.Text
+  remediationSteps     Json
+  complianceScore      Float
+  criticalCount        Int      @default(0)
+  seriousCount         Int      @default(0)
+  moderateCount        Int      @default(0)
+  minorCount           Int      @default(0)
+  shareableLink        String?  @unique
+  shareableUntil       DateTime?
+  printableHtml        String?  @db.Text
+  pdfPath              String?
+  generatedAt          DateTime @default(now())
+  expiresAt            DateTime?
+
+  // Relations
+  audit Audit @relation(fields: [auditId], references: [id], onDelete: Cascade)
+
+  @@index([auditId])
+  @@index([shareableLink])
+  @@map("reports")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  resource    String
+  resourceId  String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+model SystemMetric {
+  id        String   @id @default(cuid())
+  name      String
+  value     Float
+  unit      String?
+  metadata  Json?
+  timestamp DateTime @default(now())
+
+  @@index([name])
+  @@index([timestamp])
+  @@map("system_metrics")
+}
