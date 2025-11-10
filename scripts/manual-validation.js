@@ -19,6 +19,8 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // Configuration
+const DEMO_MODE = process.env.DEMO_MODE === 'true' || process.argv.includes('--demo');
+
 const PROSPECTS = [
   {
     name: 'HealthTech Solutions',
@@ -59,6 +61,58 @@ const SEVERITY_SCORES = {
   moderate: 4,
   minor: 2
 };
+
+/**
+ * Demo scan that simulates results (no browser needed)
+ */
+async function demoScanWebsite(url, vertical) {
+  console.log(`  → Running DEMO scan (no browser required)...`);
+
+  // Simulate realistic violation counts by vertical
+  const violationsByVertical = {
+    healthcare: { total: 47, critical: 12, serious: 8 },
+    fintech: { total: 53, critical: 15, serious: 11 },
+    education: { total: 38, critical: 9, serious: 7 },
+    gaming: { total: 61, critical: 18, serious: 14 },
+    ecommerce: { total: 44, critical: 11, serious: 9 }
+  };
+
+  const counts = violationsByVertical[vertical] || { total: 50, critical: 12, serious: 10 };
+
+  // Generate realistic violations
+  const criticalViolations = [
+    {
+      id: 'image-alt',
+      impact: 'critical',
+      help: 'Images must have alternate text',
+      nodes: Array(counts.critical).fill({ target: ['img'] })
+    },
+    {
+      id: 'color-contrast',
+      impact: 'serious',
+      help: 'Elements must have sufficient color contrast',
+      nodes: Array(counts.serious).fill({ target: ['.button'] })
+    },
+    {
+      id: 'keyboard-navigation',
+      impact: 'serious',
+      help: 'Interactive elements must be keyboard accessible',
+      nodes: Array(6).fill({ target: ['button'] })
+    }
+  ];
+
+  await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate scan time
+
+  return {
+    totalViolations: counts.total,
+    criticalViolations: criticalViolations,
+    passes: 120,
+    incomplete: 5,
+    screenshotPath: `output/screenshots/${url.replace(/[^a-z0-9]/gi, '_')}.png`,
+    timestamp: new Date().toISOString(),
+    demoMode: true
+  };
+}
 
 /**
  * Scan website for accessibility violations
@@ -251,6 +305,12 @@ function generateSummary(results) {
 async function validate() {
   console.log('🚀 WCAG AI Platform - Manual Validation Script\n');
   console.log('=' .repeat(60));
+
+  if (DEMO_MODE) {
+    console.log('⚡ DEMO MODE: Simulating scans (no browser required)');
+    console.log('   Run with real Chrome: DEMO_MODE=false node scripts/manual-validation.js\n');
+  }
+
   console.log('Scanning 5 prospect websites to validate market demand...\n');
 
   // Create output directories
@@ -268,8 +328,10 @@ async function validate() {
     console.log('-'.repeat(60));
 
     try {
-      // Scan website
-      const scanResults = await scanWebsite(prospect.website);
+      // Scan website (use demo mode if Chrome not available)
+      const scanResults = DEMO_MODE
+        ? await demoScanWebsite(prospect.website, prospect.vertical)
+        : await scanWebsite(prospect.website);
       const complianceScore = calculateComplianceScore(scanResults);
 
       console.log(`  ✓ Scan complete: ${scanResults.criticalViolations.length} critical violations`);
