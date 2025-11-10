@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "principles": {
+    "truthfulness": { "require_uncertainty_flags": true },
+    "accessibility_first": { "wcag_min_level": "AA" },
+    "trauma_informed": { "tone_checks_enabled": true },
+    "autonomy_respect": { "disallow_dark_patterns": true },
+    "auditability": { "require_explanations": true }
+  }
+}
