@@ -29,7 +29,23 @@ app.use(helmet({
 
 // CORS configuration
 const corsOptions = {
-  origin: config.cors.origins.includes('*') ? '*' : config.cors.origins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // In development or if origins is ['*'], allow all
+    if (config.env !== 'production' || config.cors.origins.includes('*')) {
+      return callback(null, true);
+    }
+    
+    // In production, check against whitelist
+    if (config.cors.origins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Reject if not in whitelist
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
