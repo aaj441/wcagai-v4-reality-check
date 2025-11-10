@@ -62,13 +62,14 @@ const WEIGHTS = {
 
 /**
  * Known patterns that may indicate false positives
+ * Using non-greedy quantifiers and bounded patterns to avoid ReDoS
  */
 const FALSE_POSITIVE_PATTERNS = [
-  /aria-label.*empty/i,
-  /hidden.*element/i,
+  /aria-label[^>]{0,200}?empty/i,
+  /hidden[^>]{0,200}?element/i,
   /display:\s*none/i,
   /visibility:\s*hidden/i,
-  /role.*presentation/i,
+  /role[^>]{0,200}?presentation/i,
 ];
 
 /**
