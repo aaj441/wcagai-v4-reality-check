@@ -3,7 +3,7 @@ const Joi = require('joi');
 const validateDiscovery = (req, res, next) => {
   const schema = Joi.object({
     vertical: Joi.string()
-      .valid('healthcare', 'fintech', 'ecommerce', 'education')
+      .valid('healthcare', 'fintech', 'ecommerce', 'education', 'gaming')
       .required(),
     maxResults: Joi.number().integer().min(1).max(50).default(20)
   });
@@ -47,7 +47,7 @@ const validateScan = (req, res, next) => {
 const validateVerticalScan = (req, res, next) => {
   const schema = Joi.object({
     vertical: Joi.string()
-      .valid('healthcare', 'fintech', 'ecommerce', 'education')
+      .valid('healthcare', 'fintech', 'ecommerce', 'education', 'gaming')
       .required(),
     maxSites: Joi.number().integer().min(1).max(20).default(5)
   });

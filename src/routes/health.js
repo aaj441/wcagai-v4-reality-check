@@ -40,8 +40,8 @@ router.get('/', async (req, res) => {
     heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`
   };
 
-  const statusCode = health.status === 'ok' ? 200 : 503;
-  res.status(statusCode).json(health);
+  // Always return 200 - app works in degraded mode without Redis
+  res.status(200).json(health);
 });
 
 module.exports = router;
