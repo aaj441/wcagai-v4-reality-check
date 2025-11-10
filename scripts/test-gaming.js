@@ -7,8 +7,6 @@
 
 const scannerService = require('../src/services/scanner');
 const discoveryService = require('../src/services/discovery');
-const analyticsService = require('../src/services/analytics');
-const logger = require('../src/utils/logger');
 
 async function testGamingSites() {
   console.log('\n🎮 GAMING ACCESSIBILITY TEST SUITE');

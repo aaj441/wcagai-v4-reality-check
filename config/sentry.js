@@ -44,11 +44,11 @@ function initializeSentry(app) {
       ],
       // Capture unhandled rejections
       beforeSend(event, hint) {
-        // Filter out expected errors
+        // Filter out expected 4xx errors (400, 404) but keep security-related ones (401, 403, 429)
         if (event.exception) {
           const error = hint.originalException;
-          if (error && error.statusCode && error.statusCode < 500) {
-            return null; // Don't send 4xx errors
+          if (error && error.statusCode && (error.statusCode === 400 || error.statusCode === 404)) {
+            return null; // Don't send expected 400 or 404 errors
           }
         }
         return event;
