@@ -2,10 +2,13 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
+const mongoSanitize = require('express-mongo-sanitize');
 const config = require('../config');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimiter = require('./middleware/rateLimiter');
+const { performanceMonitoring } = require('./middleware/performance');
+const { swaggerUi, swaggerDocument } = require('./swagger');
 
 // Routes
 const healthRoutes = require('./routes/health');
@@ -14,20 +17,38 @@ const scanRoutes = require('./routes/scan');
 
 const app = express();
 
+// Trust proxy if configured (for Railway, Heroku, etc.)
+if (config.trustProxy) {
+  app.set('trust proxy', 1);
+}
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: false // Allow inline scripts for dashboard
 }));
 
-// CORS
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: config.cors.origins.includes('*') ? '*' : config.cors.origins,
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 // Compression
-app.use(compression());
+if (config.compression.enabled) {
+  app.use(compression());
+}
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Sanitize input to prevent NoSQL injection
+app.use(mongoSanitize());
+
+// Performance monitoring
+app.use(performanceMonitoring);
 
 // Rate limiting
 app.use('/api/', rateLimiter);
@@ -40,6 +61,9 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Static files (dashboard)
 app.use(express.static('public'));
@@ -57,11 +81,15 @@ app.get('/', (req, res) => {
     version: require('../package.json').version,
     endpoints: {
       health: '/health',
+      healthDetailed: '/health/detailed',
+      healthReady: '/health/ready',
+      healthLive: '/health/live',
       discovery: '/api/discovery?vertical=healthcare&maxResults=10',
       verticals: '/api/discovery/verticals',
       scan: 'POST /api/scan {url: "https://example.com"}',
       verticalScan: 'POST /api/scan/vertical {vertical: "healthcare", maxSites: 5}',
-      scanStatus: '/api/scan/status'
+      scanStatus: '/api/scan/status',
+      apiDocs: '/api-docs'
     },
     docs: 'https://github.com/aaj441/wcagai-v4-reality-check'
   });
@@ -74,7 +102,8 @@ app.use((req, res) => {
     message: `Route ${req.method} ${req.path} not found`,
     availableEndpoints: {
       health: '/health',
-      api: '/api/discovery, /api/scan'
+      api: '/api/discovery, /api/scan',
+      docs: '/api-docs'
     }
   });
 });
