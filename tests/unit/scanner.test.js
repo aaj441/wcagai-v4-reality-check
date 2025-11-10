@@ -14,6 +14,7 @@ const scannerService = require('../../src/services/scanner');
 jest.mock('puppeteer', () => ({
   launch: jest.fn().mockResolvedValue({
     newPage: jest.fn().mockResolvedValue({
+      setDefaultNavigationTimeout: jest.fn(),
       goto: jest.fn().mockResolvedValue({}),
       addScriptTag: jest.fn().mockResolvedValue({}),
       evaluate: jest.fn().mockResolvedValue({
@@ -22,6 +23,8 @@ jest.mock('puppeteer', () => ({
             id: 'color-contrast',
             impact: 'serious',
             description: 'Elements must have sufficient color contrast',
+            help: 'Elements must have sufficient color contrast',
+            helpUrl: 'https://dequeuniversity.com/rules/axe/4.8/color-contrast',
             nodes: [
               {
                 html: '<div>Test</div>',
@@ -116,6 +119,7 @@ describe('Scanner Service', () => {
     it('should timeout after configured duration', async () => {
       const puppeteer = require('puppeteer');
       const mockPage = {
+        setDefaultNavigationTimeout: jest.fn(),
         goto: jest.fn().mockImplementation(() =>
           new Promise((resolve) => setTimeout(resolve, 35000))
         ),
@@ -172,6 +176,7 @@ describe('Scanner Service', () => {
         }
         return Promise.resolve({
           newPage: jest.fn().mockResolvedValue({
+            setDefaultNavigationTimeout: jest.fn(),
             goto: jest.fn().mockResolvedValue({}),
             addScriptTag: jest.fn().mockResolvedValue({}),
             evaluate: jest.fn().mockResolvedValue({ violations: [], passes: [] }),
@@ -238,6 +243,7 @@ describe('Scanner Service', () => {
     it('should handle network errors', async () => {
       const puppeteer = require('puppeteer');
       const mockPage = {
+        setDefaultNavigationTimeout: jest.fn(),
         goto: jest.fn().mockRejectedValue(new Error('net::ERR_NAME_NOT_RESOLVED')),
         close: jest.fn()
       };
@@ -254,6 +260,7 @@ describe('Scanner Service', () => {
     it('should handle Axe-core script injection errors', async () => {
       const puppeteer = require('puppeteer');
       const mockPage = {
+        setDefaultNavigationTimeout: jest.fn(),
         goto: jest.fn().mockResolvedValue({}),
         addScriptTag: jest.fn().mockRejectedValue(new Error('Script injection failed')),
         close: jest.fn()
