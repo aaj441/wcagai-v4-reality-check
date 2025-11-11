@@ -4,6 +4,206 @@
 
 This is a **monorepo** for the WCAG AI Compliance Consultant Platform MVP. The platform helps organizations ensure web accessibility compliance through automated scanning, AI-powered analysis, and detailed reporting.
 
+## Environment Setup
+
+### Prerequisites
+
+- **Node.js**: 20 LTS or higher  
+- **Package Manager**: npm (pnpm preferred but not installed in this repo)
+- **Database**: PostgreSQL 16
+- **Cache/Queue**: Redis 7
+
+### Initial Setup Steps
+
+1. **Clone and Install**
+   ```bash
+   git clone <repository-url>
+   cd wcagai-v4-reality-check
+   npm install
+   ```
+
+2. **Environment Configuration**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your credentials:
+   # - DATABASE_URL (PostgreSQL connection string)
+   # - REDIS_URL (Redis connection string)
+   # - OPENAI_API_KEY (for AI features)
+   ```
+
+3. **Database Setup**
+   ```bash
+   # Navigate to db package
+   cd packages/db
+   npx prisma generate
+   npx prisma migrate dev
+   ```
+
+4. **Build All Packages**
+   ```bash
+   # From root directory
+   npm run build
+   ```
+
+5. **Start Development**
+   ```bash
+   # Run all apps in development mode
+   npm run dev
+   
+   # Or run specific apps:
+   cd apps/dashboard && npm run dev    # Dashboard on http://localhost:3000
+   cd apps/scanner && npm run dev      # Scanner service
+   ```
+
+### Common Commands
+
+**Development:**
+```bash
+npm run dev          # Start all apps in development mode
+npm run build        # Build all packages and apps
+npm run test         # Run all tests across the monorepo
+npm run lint         # Lint all packages and apps
+npm run type-check   # TypeScript type checking
+npm run format       # Format code with Prettier
+npm run clean        # Clean all build artifacts
+```
+
+**Package-Specific:**
+```bash
+cd apps/dashboard && npm run dev      # Next.js dashboard
+cd apps/scanner && npm run dev        # Scanner service
+cd packages/core && npm test          # Test core package
+cd packages/db && npx prisma studio   # Open Prisma Studio
+```
+
+**Turbo Commands:**
+```bash
+turbo run build --filter=@wcag/core   # Build specific package
+turbo run test --filter=apps/scanner  # Test specific app
+turbo run dev --parallel              # Run all dev servers in parallel
+```
+
+## Monorepo Workflow
+
+### Working with Turborepo
+
+This project uses **Turborepo** for monorepo orchestration:
+
+- **Pipeline**: Tasks are defined in `turbo.json` with dependencies
+- **Caching**: Turbo caches build outputs for faster rebuilds
+- **Parallel Execution**: Tasks run in parallel when possible
+- **Workspaces**: Packages are linked via npm workspaces
+
+### Package Dependencies
+
+```
+apps/dashboard  → packages/core, packages/db, packages/utils
+apps/scanner    → packages/core, packages/db, packages/utils
+packages/core   → packages/utils
+packages/db     → (standalone)
+packages/utils  → (standalone)
+```
+
+### Adding New Packages
+
+When creating new packages or apps:
+1. Create the directory structure
+2. Add `package.json` with proper naming (`@wcag/package-name`)
+3. Update `turbo.json` if new tasks are needed
+4. Import via workspace protocol in dependent packages
+
+## Sensitive Files and Restrictions
+
+### Files Copilot Should NOT Modify (without explicit permission)
+
+**Security & Configuration:**
+- `.env*` files (except `.env.example`)
+- `railway.json` (deployment configuration)
+- `.github/workflows/*` (CI/CD pipelines)
+- Any files containing secrets or API keys
+
+**Database:**
+- `packages/db/migrations/*` (existing migrations)
+- Only add NEW migrations, never modify existing ones
+
+**Build Artifacts:**
+- `node_modules/`
+- `dist/`, `.next/`, `build/`
+- `coverage/`
+- `.turbo/`
+
+**Legal & Documentation:**
+- `LICENSE`
+- Change `AUDIT_REPORT.md`, `EXECUTIVE_SUMMARY.md` only when explicitly requested
+
+### Safe to Modify
+
+- Source code in `/src` directories
+- Test files (`*.test.ts`, `*.spec.ts`)
+- Component files in `/app`, `/components`
+- Documentation (README.md files, `/docs`)
+- Configuration (tsconfig.json, package.json - with care)
+
+## Task Scoping Guidelines for Copilot
+
+### Good Task Examples
+
+✅ **Well-Scoped Tasks:**
+- "Add unit tests for ConfidenceScoringEngine.calculateScore() method"
+- "Fix TypeScript errors in apps/dashboard/app/page.tsx"
+- "Update README.md to document new environment variables"
+- "Refactor scanner service to use async/await instead of promises"
+- "Add error handling to API route /api/scan"
+
+✅ **Clear Acceptance Criteria:**
+- "Add CORS middleware to Next.js API routes that allows requests from localhost:3000"
+- "Update Prisma schema to add 'priority' field to Scan model, then generate migration"
+- "Fix failing test in packages/core/ConfidenceScoringEngine.test.ts"
+
+### Tasks to Avoid or Break Down
+
+❌ **Too Broad:**
+- "Improve the entire scanner service"
+- "Make the dashboard look better"
+- "Add more features to the platform"
+
+❌ **Requires Deep Context:**
+- "Redesign the database schema"
+- "Change the AI model strategy"
+- "Rewrite the authentication system"
+
+### How to Create Good Issues for Copilot
+
+1. **Be Specific**: Reference exact files, functions, or line numbers
+2. **Provide Context**: Explain why the change is needed
+3. **Set Boundaries**: Specify what should NOT be changed
+4. **Include Tests**: Mention if tests should be added/updated
+5. **Define Success**: What does "done" look like?
+
+**Example Template:**
+```
+**Task**: Add validation for URL input in scanner service
+
+**Files to Modify**:
+- apps/scanner/src/validators.ts (create if doesn't exist)
+- apps/scanner/src/index.ts (use the validator)
+
+**Requirements**:
+- Validate URL format using a library (e.g., validator.js)
+- Reject non-HTTP(S) URLs
+- Add unit tests in apps/scanner/src/validators.test.ts
+
+**Acceptance Criteria**:
+- [ ] URL validator function created
+- [ ] Function used in scanner entry point
+- [ ] Tests cover valid and invalid cases
+- [ ] TypeScript types are properly defined
+
+**Do NOT**:
+- Change existing Prisma schema
+- Modify CI/CD workflows
+```
+
 ## Architecture
 
 ### Monorepo Structure
@@ -264,7 +464,61 @@ export const config = {
 };
 ```
 
-## Debugging Tips
+## Debugging and Troubleshooting
+
+### Common Issues
+
+**Build Failures:**
+```bash
+# Clear Turbo cache and rebuild
+npm run clean
+npm install
+npm run build
+```
+
+**Type Errors:**
+```bash
+# Regenerate Prisma types
+cd packages/db && npx prisma generate
+npm run type-check
+```
+
+**Test Failures:**
+```bash
+# Run tests in watch mode for specific package
+cd packages/core && npm test -- --watch
+```
+
+**Database Issues:**
+```bash
+# Reset database (WARNING: destroys data)
+cd packages/db && npx prisma migrate reset
+
+# View database in browser
+cd packages/db && npx prisma studio
+```
+
+### IDE Setup
+
+**VSCode Recommended Extensions:**
+- ESLint
+- Prettier
+- Prisma
+- TypeScript and JavaScript Language Features
+- Tailwind CSS IntelliSense
+
+**VSCode Settings:**
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
+```
+
+### Debugging Tips
 
 1. **Use TypeScript's `satisfies` operator** for type checking
 2. **Enable source maps** for better debugging
@@ -284,11 +538,13 @@ export const config = {
 
 For questions or clarifications, refer to:
 1. This document first
-2. Package-specific README files
+2. Package-specific README files in each app/package
 3. Technical design documents in `/docs`
-4. Team lead or senior developer
+4. `.env.example` for required environment variables
+5. `turbo.json` for task pipeline configuration
+6. Team lead or senior developer
 
 ---
 
-**Last Updated:** November 10, 2025
-**Version:** 1.0.0
+**Last Updated:** November 10, 2025  
+**Version:** 1.1.0
