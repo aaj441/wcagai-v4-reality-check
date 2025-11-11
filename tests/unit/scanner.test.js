@@ -21,6 +21,8 @@ jest.mock('puppeteer', () => ({
             id: 'color-contrast',
             impact: 'serious',
             description: 'Elements must have sufficient color contrast',
+            help: 'Elements must have sufficient color contrast',
+            helpUrl: 'https://dequeuniversity.com/rules/axe/4.8/color-contrast',
             nodes: [
               {
                 html: '<div>Test</div>',
