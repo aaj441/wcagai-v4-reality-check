@@ -97,6 +97,27 @@ node scripts/manual-validation.js
 
 **Success Metric:** 40%+ reply rate (2/5 prospects) = strong product-market fit
 
+### 🤖 Automation (NEW!)
+
+Automate the entire workflow - from deployment to sending emails:
+
+```bash
+# One-command automation: Deploy → Validate → Download
+./scripts/automate-validation.sh
+
+# GitHub Actions: Auto-deploy on git push
+# Scheduled validation: Weekly scans automatically
+# Email automation: Send to prospects automatically
+```
+
+**4 levels of automation available:**
+- **Level 1:** One-command script (fastest)
+- **Level 2:** GitHub Actions CI/CD (recommended)
+- **Level 3:** Scheduled weekly scans (autopilot)
+- **Level 4:** Automated email sending (advanced)
+
+**See full guide:** [AUTOMATION_GUIDE.md](AUTOMATION_GUIDE.md)
+
 ### Environment Variables
 
 Create a `.env` file with the following:

@@ -1,0 +1,93 @@
+name: Scheduled Validation
+
+on:
+  # Run every Monday at 9 AM UTC
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      notify_email:
+        description: 'Email to notify when complete'
+        required: false
+        default: ''
+
+jobs:
+  validate:
+    name: Run Market Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Run validation on Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "🚀 Running validation script on Railway..."
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          railway run node scripts/manual-validation.js
+          echo "✅ Validation complete"
+
+      - name: Download results
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "📥 Downloading validation results..."
+          mkdir -p validation-results/{emails,screenshots,reports}
+
+          # Download emails
+          railway run cat output/emails/HealthTech_Solutions.txt > validation-results/emails/HealthTech_Solutions.txt || true
+          railway run cat output/emails/FinancePro_Digital.txt > validation-results/emails/FinancePro_Digital.txt || true
+          railway run cat output/emails/EduLearn_Platform.txt > validation-results/emails/EduLearn_Platform.txt || true
+          railway run cat output/emails/GameHub_Network.txt > validation-results/emails/GameHub_Network.txt || true
+          railway run cat output/emails/ShopEasy_Commerce.txt > validation-results/emails/ShopEasy_Commerce.txt || true
+
+          # Download report
+          railway run sh -c 'cat output/reports/*.json' > validation-results/reports/full-report.json || true
+
+          echo "✅ Results downloaded"
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-results-${{ github.run_number }}
+          path: validation-results/
+          retention-days: 30
+
+      - name: Generate summary
+        run: |
+          echo "## 📊 Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          EMAIL_COUNT=$(ls validation-results/emails/*.txt 2>/dev/null | wc -l)
+          echo "**Emails Generated:** $EMAIL_COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Generated Emails:" >> $GITHUB_STEP_SUMMARY
+          for email in validation-results/emails/*.txt; do
+            if [ -f "$email" ]; then
+              echo "- $(basename $email)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📥 Download results from the **Artifacts** section above." >> $GITHUB_STEP_SUMMARY
+
+      - name: Send notification (optional)
+        if: github.event.inputs.notify_email != ''
+        run: |
+          echo "Would send notification to: ${{ github.event.inputs.notify_email }}"
+          echo "Results are available in GitHub Actions artifacts"
